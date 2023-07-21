@@ -18,13 +18,13 @@ double callOptionValue(double underlying_price, double strike_price, double risk
 	double deltaT = time_to_maturity / height;
 	double up_factor = exp(volatility * sqrt(deltaT));
 	double down_factor = 1.0 / up_factor;
-	
+
 	//initializing result price vector
 	vector<double> price_vector(height + 1);
 
 	//intialize option values at expiration date
 	for (int i = 0; i < height + 1; i++) {
-		price_vector[i] = max(0.0, underlying_price * pow(up_factor, i) * pow(down_factor, height-i) - strike_price);
+		price_vector[i] = max(0.0, underlying_price * pow(up_factor, i) * pow(down_factor, height - i) - strike_price);
 	}
 
 	double compounded_return = exp(risk_free_interest_rate * deltaT);
@@ -32,7 +32,7 @@ double callOptionValue(double underlying_price, double strike_price, double risk
 	double risk_neutral_down = 1.0 - risk_neutral_up;
 
 	// evaluate option values at earlier nodes
-	for (int j = height-1; j >= 0; j--) {
+	for (int j = height - 1; j >= 0; j--) {
 		for (int i = 0; i <= j; i++) {
 			price_vector[i] = exp(-risk_free_interest_rate * deltaT) * (risk_neutral_up * price_vector[i + 1] + risk_neutral_down * price_vector[i]);
 

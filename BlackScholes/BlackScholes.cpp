@@ -3,12 +3,12 @@
 #include <random>
 using namespace std;
 
-/* 
+/*
 * @brief Simulates the cumulative density function of a standard normal distribution
 * @param x: input variable
 * @returns value of cdf at x
 */
-double normalCDF(double x) 
+double normalCDF(double x)
 {
 	return 0.5 * (1 + erf(x / sqrt(2)));
 }
@@ -86,7 +86,7 @@ int main() {
 	double risk_free_interest_rate = 0.0212;
 	double time_to_maturity = 101;
 	double volatility = 0.3364;
-	
+
 	// values
 	double call = callOptionValue(underlying_price, strike_price, risk_free_interest_rate, time_to_maturity, volatility);
 	double put = putOptionValue(underlying_price, strike_price, risk_free_interest_rate, time_to_maturity, volatility);
