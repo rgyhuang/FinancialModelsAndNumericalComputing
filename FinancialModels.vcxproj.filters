@@ -13,17 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Binomial">
-      <UniqueIdentifier>{df438f62-a1ec-46f8-87e2-6ad0962e1f41}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\BlackScholes">
       <UniqueIdentifier>{a57b8ce8-570a-47ee-bd00-d0a565826e64}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Binomial.cpp">
-      <Filter>Source Files\Binomial</Filter>
-    </ClCompile>
     <ClCompile Include="BlackScholes.cpp">
       <Filter>Source Files\BlackScholes</Filter>
     </ClCompile>
