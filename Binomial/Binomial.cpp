@@ -91,7 +91,7 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 
 
 int main() {
-	int N = 15000;
+	int N = 150;
 	double S0 = 100.0;
 	double K = 100.0;
 	double T = 1.0;
