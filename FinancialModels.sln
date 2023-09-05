@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlackScholes", "BlackSchole
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Binomial", "Binomial\Binomial.vcxproj", "{48E80170-B574-4EA2-970A-997553801055}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MonteCarlo", "MonteCarlo\MonteCarlo.vcxproj", "{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{48E80170-B574-4EA2-970A-997553801055}.Release|x64.Build.0 = Release|x64
 		{48E80170-B574-4EA2-970A-997553801055}.Release|x86.ActiveCfg = Release|Win32
 		{48E80170-B574-4EA2-970A-997553801055}.Release|x86.Build.0 = Release|Win32
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Debug|x64.ActiveCfg = Debug|x64
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Debug|x64.Build.0 = Debug|x64
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Debug|x86.ActiveCfg = Debug|Win32
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Debug|x86.Build.0 = Debug|Win32
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Release|x64.ActiveCfg = Release|x64
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Release|x64.Build.0 = Release|x64
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Release|x86.ActiveCfg = Release|Win32
+		{EAED1764-B7E5-4266-870E-E1B66E4AF3DC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
