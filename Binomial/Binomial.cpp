@@ -93,22 +93,22 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 //	                                                                                     //
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-///*
-//* @brief Parallelized Implementation of Binomial Call Option Model
-//* @param underlying_price: price of stock/underlying asset
-//* @param strike_price: strike price of contract
-//* @param risk_free_interest_rate: risk-free interest rate
-//* @param time_to_maturity: time until expiration date of contract (assumed contract can only be exercised then)
-//* @param volatility: volatility of underlying asset
-//* @param dividend_yield: dividend yield for instruments that pay in dividends
-//* @param height: height of the Binomial Tree
-//* @returns call option price based on Binomial Model
-//*/
-//double callOptionValue(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int height)
-//{
-//	To be implemented
-// 
-//}
+/*
+* @brief Parallelized Implementation of Binomial Call Option Model
+* @param underlying_price: price of stock/underlying asset
+* @param strike_price: strike price of contract
+* @param risk_free_interest_rate: risk-free interest rate
+* @param time_to_maturity: time until expiration date of contract (assumed contract can only be exercised then)
+* @param volatility: volatility of underlying asset
+* @param dividend_yield: dividend yield for instruments that pay in dividends
+* @param height: height of the Binomial Tree
+* @returns call option price based on Binomial Model
+*/
+double callOptionValue(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int height)
+{
+	
+ 
+}
 
 int main() {
 	int N = 150;
