@@ -24,17 +24,18 @@ double callOptionValue(double underlying_price, double strike_price, double risk
 	double dt = time_to_maturity / N;
 	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
 	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price * exp((risk_free_interest_rate-dividend_yield) * time_to_maturity));
+	double lnS = log(underlying_price);
 
 	// standard error placeholders
 	double sum_CT = 0.0;
 	double sum_CT2 = 0.0;
 
+
 	// run simulations
 	for (int i = 0; i < M; i++) {
 		double lnSt = lnS;
 		for (int j = 0; j < N; j++) {
-			lnSt = lnSt + nudt + volsdt * distribution(generator);
+			lnSt += nudt + (volsdt * distribution(generator));
 		}
 		double ST = exp(lnSt);
 		double CT = max(0.0, ST - strike_price);
@@ -71,7 +72,7 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 	double dt = time_to_maturity / N;
 	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
 	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price * exp((risk_free_interest_rate - dividend_yield) * time_to_maturity));
+	double lnS = log(underlying_price);
 
 	// standard error placeholders
 	double sum_CT = 0.0;
@@ -81,7 +82,7 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 	for (int i = 0; i < M; i++) {
 		double lnSt = lnS;
 		for (int j = 0; j < N; j++) {
-			lnSt = lnSt + nudt + volsdt * distribution(generator);
+			lnSt += nudt + volsdt * distribution(generator);
 		}
 		double ST = exp(lnSt);
 		double CT = max(0.0, strike_price - ST);
@@ -100,7 +101,7 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 }
 
 
-// Use sieve of Eratosthenes to compute first n primesprimes
+// Use sieve of Eratosthenes to compute first n primes
 vector<int> sieve(int n) {
 	vector<bool>prime(n*n, true);
 	vector<int> res;
@@ -184,7 +185,7 @@ double callOptionValueHalton(double underlying_price, double strike_price, doubl
 	double dt = time_to_maturity / N;
 	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
 	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price * exp((risk_free_interest_rate - dividend_yield) * time_to_maturity));
+	double lnS = log(underlying_price);
 
 	// standard error placeholders
 	double sum_CT = 0.0;
@@ -248,7 +249,7 @@ double putOptionValueHalton(double underlying_price, double strike_price, double
 	double dt = time_to_maturity / N;
 	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
 	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price * exp((risk_free_interest_rate - dividend_yield) * time_to_maturity));
+	double lnS = log(underlying_price);
 
 	// standard error placeholders
 	double sum_CT = 0.0;
@@ -258,7 +259,7 @@ double putOptionValueHalton(double underlying_price, double strike_price, double
 	for (int i = 0; i < M; i++) {
 		double lnSt = lnS;
 		for (int j = 0; j < N; j++) {
-			lnSt = lnSt + nudt + volsdt * generate(primes, perms, currDim, N, globalSample);
+			lnSt += + nudt + volsdt * generate(primes, perms, currDim, N, globalSample);
 			currDim++;
 		}
 		double ST = exp(lnSt);
@@ -278,13 +279,13 @@ double putOptionValueHalton(double underlying_price, double strike_price, double
 
 
 int main() {
-	double S = 31.15;
+	double S = 31.55;
 	double K = 22.75;
 	double vol = 0.5;
 	double r = 0.05;
 	double T = 3.5;
-	int N = 10;
-	int M = 10000;
+	int N = 100;
+	int M = 1000;
 
 	double* errorfactorCall = (double*) malloc(sizeof(double));
 	double resultCall = callOptionValue(S, K, r, T, vol, 0.0, N, M, errorfactorCall);

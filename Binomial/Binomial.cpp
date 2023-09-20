@@ -22,21 +22,22 @@ double callOptionValue(double underlying_price, double strike_price, double risk
 	double p1 = exp(-risk_free_interest_rate * deltaT) - p0;
 
 	//initializing result price vector
-	vector<double> price_vector(height + 1);
+	vector<double> price_vector(height);
 
 	//intialize option values at expiration date
-	for (int i = 0; i < height + 1; i++) {
+	for (int i = 0; i < height; i++) {
 		price_vector[i] = max(0.0, (underlying_price*pow(up_factor, 2*i - height)) - strike_price);
 	}
 
 	// evaluate option values at earlier nodes
-	for (int j = height - 1; j >= 0; j--) {
-		for (int i = 0; i <= j; i++) {
+	for (int j = height - 1; j > 0; j--) {
+		for (int i = 0; i < j; i++) {
 			price_vector[i] = p0 * price_vector[i + 1] + p1 * price_vector[i];
 
-			// exercise value, take the max(binomial value, exercise) for American options
+			
 			double exercise = underlying_price * pow(up_factor, (2 * i) - j)- strike_price;
-			if (price_vector[i] < exercise) price_vector[i] = exercise;
+			// exercise value, take the max(binomial value, exercise) for American options
+			// price_vector[i] = max(exercise, price_vector[i]);
 
 		}
 	}
@@ -63,21 +64,21 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 	double p1 = exp(-risk_free_interest_rate * deltaT) - p0;
 
 	//initializing result price vector
-	vector<double> price_vector(height + 1);
+	vector<double> price_vector(height);
 
 	//intialize option values at expiration date
-	for (int i = 0; i < height + 1; i++) {
+	for (int i = 0; i < height; i++) {
 		price_vector[i] = max(0.0, strike_price - (underlying_price * pow(up_factor, 2 * i - height)));
 	}
 
 	// evaluate option values at earlier nodes
-	for (int j = height - 1; j >= 0; j--) {
-		for (int i = 0; i <= j; i++) {
+	for (int j = height - 1; j > 0; j--) {
+		for (int i = 0; i < j; i++) {
 			price_vector[i] = p0 * price_vector[i + 1] + p1 * price_vector[i];
 
-			// exercise value, take the max(binomial value, exercise) for American options
 			double exercise = underlying_price * pow(up_factor, 2 * i - j) - strike_price;
-			if (price_vector[i] < exercise) price_vector[i] = exercise;
+			// exercise value, take the max(binomial value, exercise) for American options
+			// price_vector[i] = max(exercise, price_vector[i]);
 
 		}
 	}
@@ -93,31 +94,32 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 //	                                                                                     //
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
-* @brief Parallelized Implementation of Binomial Call Option Model
-* @param underlying_price: price of stock/underlying asset
-* @param strike_price: strike price of contract
-* @param risk_free_interest_rate: risk-free interest rate
-* @param time_to_maturity: time until expiration date of contract (assumed contract can only be exercised then)
-* @param volatility: volatility of underlying asset
-* @param dividend_yield: dividend yield for instruments that pay in dividends
-* @param height: height of the Binomial Tree
-* @returns call option price based on Binomial Model
-*/
-double callOptionValue(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int height)
-{
-	
- 
-}
+///*
+//* @brief Parallelized Implementation of Binomial Call Option Model
+//* @param underlying_price: price of stock/underlying asset
+//* @param strike_price: strike price of contract
+//* @param risk_free_interest_rate: risk-free interest rate
+//* @param time_to_maturity: time until expiration date of contract (assumed contract can only be exercised then)
+//* @param volatility: volatility of underlying asset
+//* @param dividend_yield: dividend yield for instruments that pay in dividends
+//* @param height: height of the Binomial Tree
+//* @returns call option price based on Binomial Model
+//*/
+//double callOptionValue(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int height)
+//{
+//	
+// 
+//}
 
 int main() {
-	int N = 150;
-	double S0 = 100.0;
-	double K = 100.0;
-	double T = 1.0;
-	double r = 0.1;
-	double sigma = 0.2;
-	double q = 0.0;
+	int N = 1000;
+	double S0 = 31.55;
+	double K = 22.75;
+	double T = 3.5;
+	double r = 0.05;
+	double sigma = 0.5;
+	double q = 0.15;
+
 	cout << callOptionValue(S0, K, r, T, sigma, q, N) << endl;
 	cout << putOptionValue(S0, K, r, T, sigma, q, N) << endl;
 
