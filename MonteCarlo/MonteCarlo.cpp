@@ -4,6 +4,28 @@
 #include <chrono>
 using namespace std;
 
+static default_random_engine generator;
+#define M_PI 3.14159265358979323846
+
+
+double W(int N, double T, double r, double q, double sigma, double S0) {
+	normal_distribution<double> dist(0, 1);
+	double dt = T / N;
+	vector<double> S;
+	S.push_back(S0);
+	double drift = exp(dt * ((r - q) - 0.5 * pow(sigma, 2)));
+	double vol = sqrt(pow(sigma, 2) * dt);
+	for (int i = 1; i < N; i++) {
+		double Z = dist(generator);
+		S.push_back(S[i - 1] * drift * exp(vol * Z));
+	}
+	
+	return S.back();
+
+}
+
+
+
 /*
 * @brief Monte Carlo Simulation for Call Option Pricing with Standard Error Measure
 * @param underlying_price: price of stock/underlying asset
@@ -19,34 +41,28 @@ using namespace std;
 */
 double callOptionValue(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int N, int M, double* stderrorp)
 {
-	default_random_engine generator;
-	normal_distribution<double> distribution(0, 1);
-	double dt = time_to_maturity / N;
-	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
-	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price);
 
 	// standard error placeholders
 	double sum_CT = 0.0;
-	double sum_CT2 = 0.0;
 
+	vector<double> simulations;
 
 	// run simulations
 	for (int i = 0; i < M; i++) {
-		double lnSt = lnS;
-		for (int j = 0; j < N; j++) {
-			lnSt += nudt + (volsdt * distribution(generator));
-		}
-		double ST = exp(lnSt);
+		double ST = W(N, time_to_maturity, risk_free_interest_rate, dividend_yield, volatility, underlying_price);
+		simulations.push_back(ST);
 		double CT = max(0.0, ST - strike_price);
 		sum_CT += CT;
-		sum_CT2 += pow(CT, 2);
 	}
 
 	double C0 = exp(-risk_free_interest_rate * time_to_maturity) * sum_CT / M;
 	if (stderrorp) {
-		double sigma = sqrt((sum_CT2 - (pow(sum_CT, 2) / M)) * exp(-2 * risk_free_interest_rate * time_to_maturity) / (M - 1));
-		double SE = sigma / sqrt(M);
+		double sum_CT2 = 0.0;
+		// calculating sample variance
+		for (double x : simulations) {
+			sum_CT2 = pow(x - C0, 2);
+		}
+		double SE = sum_CT2 / (M-1);
 		*stderrorp = SE;
 	}
 	return C0;
@@ -67,33 +83,27 @@ double callOptionValue(double underlying_price, double strike_price, double risk
 */
 double putOptionValue(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int N, int M, double* stderrorp) 
 {
-	default_random_engine generator;
-	normal_distribution<double> distribution(0, 1);
-	double dt = time_to_maturity / N;
-	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
-	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price);
-
 	// standard error placeholders
 	double sum_CT = 0.0;
-	double sum_CT2 = 0.0;
+
+	vector<double> simulations;
 
 	// run simulations
 	for (int i = 0; i < M; i++) {
-		double lnSt = lnS;
-		for (int j = 0; j < N; j++) {
-			lnSt += nudt + volsdt * distribution(generator);
-		}
-		double ST = exp(lnSt);
+		double ST = W(N, time_to_maturity, risk_free_interest_rate, dividend_yield, volatility, underlying_price);
+		simulations.push_back(ST);
 		double CT = max(0.0, strike_price - ST);
 		sum_CT += CT;
-		sum_CT2 += pow(CT, 2);
 	}
 
 	double C0 = exp(-risk_free_interest_rate * time_to_maturity) * sum_CT / M;
 	if (stderrorp) {
-		double sigma = sqrt((sum_CT2 - (pow(sum_CT, 2) / M)) * exp(-2 * risk_free_interest_rate * time_to_maturity) / (M - 1));
-		double SE = sigma / sqrt(M);
+		double sum_CT2 = 0.0;
+		// calculating sample variance
+		for (double x : simulations) {
+			sum_CT2 = pow(x - C0, 2);
+		}
+		double SE = sum_CT2 / (M - 1);
 		*stderrorp = SE;
 	}
 	return C0;
@@ -131,7 +141,7 @@ double scrambledRadicalInverse(vector<int> perm, int a, int b) {
 		// Extend sequence to new digit
 		reversedDigits = (double) reversedDigits * b + perm[digit];
 		// Update the power
-		invBaseN *= invBase;
+		invBaseN = invBase;
 		a = next;
 	}
 	return reversedDigits * invBaseN;
@@ -149,6 +159,33 @@ double generate(vector<int>&primes, vector<vector<int>> &perms, int currentDimen
 
 }
 
+double boxMuller(double U1, double U2, double mean, double sigma) {
+	double u = U1 * 2 * M_PI;
+	return sigma * sqrt(U2) * cos(u) + mean;
+}
+
+double haltonPath(int N, double T, double r, double q, double sigma, double S0, vector<int> primes, vector<vector<int>> &perms) {
+	// dimensions of sampling
+	int currDim = 0, globalSample = 0;
+
+	double dt = T / N;
+	vector<double> S;
+	S.push_back(S0);
+	double drift = exp(dt * ((r - q) - 0.5 * pow(sigma, 2)));
+	double vol = sqrt(pow(sigma, 2) * dt);
+	for (int i = 1; i < N; i++) {
+		double Z1 = generate(primes, perms, currDim, N, globalSample);
+		globalSample++;
+		double Z2 = generate(primes, perms, currDim, N, globalSample);
+		currDim++;
+		globalSample++;
+		double Z = boxMuller(Z1, Z2, 0, 1);
+		S.push_back(S[i - 1] * drift * exp(vol * Z));
+	}
+
+	return S.back();
+
+}
 
 /*
 * @brief Monte Carlo Simulation Using Halton Sampling for Call Option Pricing with Standard Error Measure
@@ -166,48 +203,41 @@ double generate(vector<int>&primes, vector<vector<int>> &perms, int currentDimen
 double callOptionValueHalton(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int N, int M, double* stderrorp)
 {
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-	// dimensions of sampling
-	int currDim = 0, globalSample = 0;
+	// standard error placeholders
+	double sum_CT = 0.0;
 
-	vector<int> primes = sieve(N+1);
+	vector<double> simulations;
+
+
+	vector<int> primes = sieve(N + 1);
 
 	// Pre-compute a permutation for every prime base b
 	vector<vector<int>> perms;
 	for (int i = 0; i < N; i++) {
 		vector<int> row;
-		for (int j = 0; j < primes[i+1]; j++) {
+		for (int j = 0; j < primes[i + 1]; j++) {
 			row.push_back(j);
 		}
 		shuffle(row.begin() + 1, row.end(), default_random_engine(seed));
 		perms.push_back(row);
 	}
 
-	double dt = time_to_maturity / N;
-	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
-	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price);
-
-	// standard error placeholders
-	double sum_CT = 0.0;
-	double sum_CT2 = 0.0;
-
 	// run simulations
 	for (int i = 0; i < M; i++) {
-		double lnSt = lnS;
-		for (int j = 0; j < N; j++) {
-			lnSt = lnSt + nudt + volsdt * generate(primes, perms, currDim, N, globalSample);
-			currDim++;
-		}
-		double ST = exp(lnSt);
-		double CT = max(0.0, ST - strike_price);
+		double ST = haltonPath(N, time_to_maturity, risk_free_interest_rate, dividend_yield, volatility, underlying_price, primes, perms);
+		simulations.push_back(ST);
+		double CT = max(0.0, ST- strike_price);
 		sum_CT += CT;
-		sum_CT2 += pow(CT, 2);
 	}
 
 	double C0 = exp(-risk_free_interest_rate * time_to_maturity) * sum_CT / M;
 	if (stderrorp) {
-		double sigma = sqrt((sum_CT2 - (pow(sum_CT, 2) / M)) * exp(-2 * risk_free_interest_rate * time_to_maturity) / (M - 1));
-		double SE = sigma / sqrt(M);
+		double sum_CT2 = 0.0;
+		// calculating sample variance
+		for (double x : simulations) {
+			sum_CT2 = pow(x - C0, 2);
+		}
+		double SE = sum_CT2 / (M - 1);
 		*stderrorp = SE;
 	}
 	return C0;
@@ -230,8 +260,11 @@ double callOptionValueHalton(double underlying_price, double strike_price, doubl
 double putOptionValueHalton(double underlying_price, double strike_price, double risk_free_interest_rate, double time_to_maturity, double volatility, double dividend_yield, int N, int M, double* stderrorp)
 {
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-	// dimensions of sampling
-	int currDim = 0, globalSample = 0;
+	// standard error placeholders
+	double sum_CT = 0.0;
+
+	vector<double> simulations;
+
 
 	vector<int> primes = sieve(N + 1);
 
@@ -246,32 +279,22 @@ double putOptionValueHalton(double underlying_price, double strike_price, double
 		perms.push_back(row);
 	}
 
-	double dt = time_to_maturity / N;
-	double nudt = (risk_free_interest_rate - 0.5 * pow(volatility, 2)) * dt;
-	double volsdt = volatility * sqrt(dt);
-	double lnS = log(underlying_price);
-
-	// standard error placeholders
-	double sum_CT = 0.0;
-	double sum_CT2 = 0.0;
-
 	// run simulations
 	for (int i = 0; i < M; i++) {
-		double lnSt = lnS;
-		for (int j = 0; j < N; j++) {
-			lnSt += + nudt + volsdt * generate(primes, perms, currDim, N, globalSample);
-			currDim++;
-		}
-		double ST = exp(lnSt);
-		double CT = max(0.0, strike_price-ST);
+		double ST = haltonPath(N, time_to_maturity, risk_free_interest_rate, dividend_yield, volatility, underlying_price, primes, perms);
+		simulations.push_back(ST);
+		double CT = max(0.0, strike_price - ST);
 		sum_CT += CT;
-		sum_CT2 += pow(CT, 2);
 	}
 
 	double C0 = exp(-risk_free_interest_rate * time_to_maturity) * sum_CT / M;
 	if (stderrorp) {
-		double sigma = sqrt((sum_CT2 - (pow(sum_CT, 2) / M)) * exp(-2 * risk_free_interest_rate * time_to_maturity) / (M - 1));
-		double SE = sigma / sqrt(M);
+		double sum_CT2 = 0.0;
+		// calculating sample variance
+		for (double x : simulations) {
+			sum_CT2 = pow(x - C0, 2);
+		}
+		double SE = sum_CT2 / (M - 1);
 		*stderrorp = SE;
 	}
 	return C0;
@@ -279,30 +302,31 @@ double putOptionValueHalton(double underlying_price, double strike_price, double
 
 
 int main() {
-	double S = 31.55;
-	double K = 22.75;
+	double S = 50.00;
+	double K = 10.00;
 	double vol = 0.5;
 	double r = 0.05;
 	double T = 3.5;
 	int N = 100;
-	int M = 1000;
+	int M = 10000;
+	double q = 0.0;
 
 	double* errorfactorCall = (double*) malloc(sizeof(double));
-	double resultCall = callOptionValue(S, K, r, T, vol, 0.0, N, M, errorfactorCall);
+	double resultCall = callOptionValue(S, K, r, T, vol, q, N, M, errorfactorCall);
 	printf("Call option value: %f \n", resultCall);
 	printf("Standard error: %f \n", *errorfactorCall);
 
 	double* errorfactorPut = (double*)malloc(sizeof(double));
-	double resultPut = putOptionValue(S, K, r, T, vol, 0.0, N, M, errorfactorPut);
+	double resultPut = putOptionValue(S, K, r, T, vol, q, N, M, errorfactorPut);
 	printf("Put option value: %f \n", resultPut);
 	printf("Standard error: %f \n", *errorfactorPut);
 
-	resultCall = callOptionValueHalton(S, K, r, T, vol, 0.0, N, M, errorfactorCall);
+	resultCall = callOptionValueHalton(S, K, r, T, vol, q, N, M, errorfactorCall);
 	printf("Call option value: %f \n", resultCall);
 	printf("Standard error: %f \n", *errorfactorCall);
 
 
-	resultCall = putOptionValueHalton(S, K, r, T, vol, 0.0, N, M, errorfactorPut);
+	resultCall = putOptionValueHalton(S, K, r, T, vol, q, N, M, errorfactorPut);
 	printf("Put option value: %f \n", resultCall);
 	printf("Standard error: %f \n", *errorfactorPut);
 

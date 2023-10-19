@@ -201,7 +201,7 @@ int main() {
 	double risk_free_interest_rate = 0.05;
 	double time_to_maturity = 3.5;
 	double volatility = 0.5;
-	double dividend_yield = 0.15;
+	double dividend_yield = 0.0;
 
 	// values
 	double call = callOptionValue(underlying_price, strike_price, risk_free_interest_rate, time_to_maturity, volatility, dividend_yield);

@@ -112,13 +112,13 @@ double putOptionValue(double underlying_price, double strike_price, double risk_
 //}
 
 int main() {
-	int N = 1000;
+	int N = 10000;
 	double S0 = 31.55;
 	double K = 22.75;
 	double T = 3.5;
 	double r = 0.05;
 	double sigma = 0.5;
-	double q = 0.15;
+	double q = 0.0;
 
 	cout << callOptionValue(S0, K, r, T, sigma, q, N) << endl;
 	cout << putOptionValue(S0, K, r, T, sigma, q, N) << endl;
